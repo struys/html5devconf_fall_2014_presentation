@@ -17,10 +17,353 @@
         <div class="reveal">
             <div class="slides">
                 <section>
-                    Foo
+                    <h1>Scaling Selenium Testing at Yelp</h1>
                 </section>
                 <section>
-                    Bar
+                    <h2>Ken Struys</h2>
+                    <ul>
+                        <li>4 years at Yelp</li>
+                        <li>homepage, signup, search of yelp.com</li>
+                        <li>Engineer Manager of Webcore (Infra for web devs)</li>
+                    </ul>
+                </section>
+                <section class="stack">
+                    <section>
+                        <h2>What is Selenium?</h2>
+                        <ul>
+                            <li>Automation framework for web applications</li>
+                            <li>Simulate user interactions</li>
+                            <li>Libraries for Java, Ruby, Python, JavaScript, C#, etc.</li>
+                            <li>Tests run in every browser</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Selenium Server</h2>
+                        <ul class="flow-diagram">
+                            <li>
+                                <span style="display: inline-block">
+                                    <img style="height: 1em; display: block" src="assets/ruby-logo.png">
+                                    <img style="height: 1em; display: block" src="assets/python-logo.png">
+                                    <img style="height: 1em; display: block" src="assets/js-logo.jpg">
+                                </span>
+                            </li>
+                            &#8594;
+                            <li>
+                                <span style="display: inline-block">
+                                    <img style="height: 3em; display: inline-block" src="assets/selenium-server-logo.png">
+                                </span>
+                            </li>
+                            &#8594;
+                            <li>
+                                <span style="display: inline-block">
+                                    <img style="display: block" src="assets/firefox/firefox_64x64.png">
+                                    <img style="display: block" src="assets/chrome/chrome_64x64.png">
+                                    <img style="display: block" src="assets/internet-explorer/internet-explorer_64x64.png">
+                                </span>
+                            </li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Disambiguate Terms</h2>
+                        <ul>
+                            <li>Selenium RC (2004)</li>
+                            <li>Selenium IDE</li>
+                            <li>Selenium Webdriver (2009)</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Selenium RC</h2>
+                        <ul>
+                            <li>Executes JavaScript to drive the browser</li>
+                            <li>Still a lot of examples out there</li>
+                            <li>Don't use it</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Selenium Webdriver</h2>
+                        <ul>
+                            <li>Replaced Selenium RC in 2009</li>
+                            <li>Still uses parts of Selenium RC</li>
+                            <li>Addressed a lot of the design issues</li>
+                            <li>Object based design - WebDriver + WebElement</li>
+                        </ul>
+                    </section>
+                </section>
+
+                <section class="stack">
+                <section>
+                    <h2>Code Examples</h2>
+                    <p>Using the Python Library</p>
+                </section>
+                <section>
+                    <h2>WebDriver</h2>
+                        <pre><code>
+    def do_selenium_stuff():
+            driver = WebDriver(
+                command_executor='http://localhost:4444/wd/hub',
+                desired_capabilities=DesiredCapabilities.FIREFOX
+            )
+            driver.implicitly_wait(10)
+
+            driver.get('http://yelp.com')
+
+            for handle in driver.window_handles:
+                driver.switch_to_window(handle)
+
+            driver.refresh()
+            img = driver.get_screenshot_as_png()
+            element = driver.find_element_by_css_selector('.foo .bar')
+                            </code></pre>
+                </section>
+                <section>
+                    <h2>WebElement</h2>
+                    <pre><code>
+    element = driver.find_element_by_css_selector('.foo .bar')
+
+    element.click()
+    element.send_keys('foo bar')
+
+    sub_element = element.find_element_by_id('sub-element')
+                        </code></pre>
+                </section>
+                <section>
+                    <h2>Selenese API Requests</h2>
+                    <code>
+                        <pre>
+
+    POST /session
+        desiredCapabilities: {"browser": "firefox", "version": "23.0"}
+
+    POST /session/2c34ac26-2d8c-4bfb-9210-3038f7c92252/element
+        using: "css selector"
+        value: ".foo input.bar"
+
+    GET /session/2c34ac26-2d8c-4bfb-9210-3038f7c92252/element/0/value
+        value: "Text to enter"
+                        </pre>
+                    </code>
+                </section>
+                <section>
+                    <h2>Remote Webdriver</h2>
+                    <ul>
+                        <li>A Simple Proxy</li>
+                        <li>Starts browsers</li>
+                        <li>Forwards selenese commands to browsers</li>
+                        <li>Browsers plugins manage execution of commands</li>
+                    </ul>
+                </section>
+                </section>
+
+                <section class="stack">
+                <section>
+                    <h2>How we write Selenium Tests at Yelp</h2>
+                </section>
+                <section>
+                    <h2>Our Workflow</h2>
+                    <ul>
+                        <li>Start a sandboxed environment</li>
+                        <li>Create fixtures</li>
+                        <li>Execute a flow</li>
+                        <li>Confirm side effects</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Login & Write a Review</h2>
+                </section>
+                <section>
+                    <h2>Sandboxing</h2>
+                    <pre><code class="no-highlight">    $ sandbox testify yelp.tests.write_a_review</code></pre>
+                    <ul>
+                        <li>Starts a new mysql instance and creates tables</li>
+                        <li>Starts starts apache, memcached, etc</li>
+                        <li>Executes command (runs our test)</li>
+                        <li>Shutdowns the sandbox</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Create Fixtures</h2>
+
+                    <pre><code>
+    def create_fixtures(email, password):
+        user = User.create(email, password)
+        business = Business.create()
+        return user, business
+                    </code></pre>
+                </section>
+                <section>
+                    <h2>Execute Flows</h2>
+                    <pre><code><span class="fragment">
+    def perform_login(driver, user):
+        driver.get('http://dev.yelp.com/login')
+        driver.find_element_by_id('email').send_keys(user.email)
+        driver.find_element_by_id('password').send_keys(user.password)
+        driver.find_element_by_css_selector('button[type=submit]').click()</span>
+<span class="fragment">
+    def perform_write_a_review(driver, rating, review_text):
+        driver
+            .find_element_by_css_selector(
+                'li:nth-child('+ rating +') input[type=radio]')
+            .click()
+        driver
+            .find_element_by_css_selector('input[name=review]')
+            .send_keys(review_text)
+        driver.find_element_by_id('submit').click()</span>
+                    </code></pre>
+                </section>
+                <section>
+                    <h2>Confirm Side Effects</h2>
+
+                    <pre><code>
+    def assert_user_wrote_review(user, business, review_text, rating):
+        review = business.reviews[0]
+        assert review.text == review_text
+        assert review.rating == rating
+        assert review.user == user
+                    </code></pre>
+                </section>
+                <section>
+                    <h2>Write The Test</h2>
+
+                    <pre><code>
+    def test_write_a_review(driver):
+        <span class="fragment">email = 'kstruys@yelp.com'
+        password = 'password'
+        review_text = 'This place is awesome!'
+        rating = 5</span>
+        <span class="fragment">user, business = create_fixtures(email, password)</span>
+        <span class="fragment">perform_login(driver, user)</span>
+        <span class="fragment">assert_user_logged_in(driver, user)</span>
+        <span class="fragment">driver.get('http://dev.yelp.com/writeareview/' + business.id)</span>
+        <span class="fragment">perform_write_a_review(driver, rating, review_text)</span>
+        <span class="fragment">assert 'Your Review has been posted' in
+            driver.find_element_by_id('alert-message')</span>
+        <span class="fragment">assert_user_wrote_review(user, business, review_text, rating)</span>
+                    </code></pre>
+                </section>
+                </section>
+                <section class="stack">
+                <section>
+                    <h2>
+                        Why is Selenium Important?
+                    </h2>
+                </section>
+                <section>
+                    <h2>Better Coverage</h2>
+                    <ul>
+                        <li class="fragment">Unit testing is necessary <span class="fragment">but not sufficient</span></li>
+                        <li class="fragment">Unacceptable to ever break the important flows</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>More Clientside Code</h2>
+                    <ul>
+                        <li class="fragment">Serverside</li>
+                        <ul class="fragment">
+                            <li>You control the software/hardware that produces HTML</li>
+                            <li>Page refreshes allow flows to restart</li>
+                        </ul>
+                        <li class="fragment">Clientside</li>
+                        <ul class="fragment">
+                            <li>Different JS engines performing rendering</li>
+                            <li>A minor bug could result in a blank/broken page</li>
+                            <li>Logging errors is more difficult</li>
+                        </ul>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Deployment</h2>
+                    <ul style="margin: 2em 0em;" class="flow-diagram">
+                        <li class="fragment"><span>Dev</span></li>
+
+                        <li class="fragment">&#8594;<span>Stage</span></li>
+
+                        <li class="fragment">&#8594;<span>Prod</span></li>
+                    </ul>
+                    <p class="fragment">Stage Testing is Tedious, Boring and Error Prone</p>
+                </section>
+                </section>
+                <section class="stack">
+                <section>
+                    <h2>Emulate the User</h2>
+                    <p>Write tests as a QA employee, not an engineer</p>
+                </section>
+                <section>
+                    <h2>JavaScript Injection</h2>
+                    <ul>
+
+                        <li class="fragment">Avoid it! <span class="fragment">(as much as possible)</span></li>
+                        <li class="fragment">Events in javascript are not consistent across browsers/versions</li>
+                        <li class="fragment">More security restrictions</li>
+                        <li class="fragment">Webdriver fires events at the OS Level (when possible)</li>
+                    </ul>
+                </section>
+                </section>
+                <section class="stack">
+                <section>
+                    <h2>Adding Selenium To Your Stack</h2>
+                </section>
+                <section>
+                    <h2>Minimal Setup</h2>
+                    <ul>
+                        <li>Every web startup should get basic selenium coverage</li>
+                        <li>Run a Docker container for firefox+selenium server</li>
+                        <li>Something working in a couple days</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Selenium at Yelp</h2>
+                    <ul>
+                        <li>~3-4 Production pushes a day</li>
+                        <li>Python Library + Firefox (we want to add more browsers)</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>4 Years ago</h2>
+                    <ul>
+                        <li class="fragment">Infrastructure setup by an intern (yup, that easy!)</li>
+                        <li class="fragment">Only test major flows - Write a Review, Signup, Login</li>
+                        <li class="fragment">~ 40 Tests</li>
+                        <li class="fragment">~ 10-15 minutes to run our selenium suite</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Today</h2>
+                    <ul>
+                        <li class="fragment">We learned how to fix and avoid flaky tests (still learning)</li>
+                        <li class="fragment">~ 1000 selenium tests</li>
+                        <li class="fragment">~ 30 minutes to run our selenium suite</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Flaky Tests</h2>
+                    <ul>
+                        <li class="fragment">Understand flakes vs failures</li>
+                        <li class="fragment">Avoid bad features in selenium (e.g. code injection)</li>
+                        <li class="fragment">Enable implicit wait</li>
+                        <li class="fragment">Selenium RC -> Webdriver</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Saucelabs</h2>
+                    <ul>
+                        <li>Free for opensource</li>
+                        <li>350 browser/OS combinations version</li>
+                        <li>Video Recording/Logging</li>
+                        <li>Tunnel to your internal dev environment</li>
+                        <li><a href="https://saucelabs.com/">saucelabs.com</a></li>
+                    </ul>
+                </section>
+                </section>
+                <section>
+                    <h2>Selenium Resources</h2>
+                    <ul>
+                        <li>Selenium Server + Libs: <a href="http://www.seleniumhq.org/">seleniumhq.org</a></li>
+                        <li>Presentation: <a href="http://github.com/struys/html5devconf_presentation">github.com/struys/html5devconf_presentation</a></li>
+                        <li>I'm always happy to help - <a href="http://twitter.com/kenstruys">@kenstruys</a></li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Questions?</h2>
                 </section>
             </div>
         </div>
