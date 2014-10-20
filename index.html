@@ -257,7 +257,7 @@
                         <pre><code>
     form = driver.find_element_by_css_selector('.signup-form')
 
-    signup_form = SignupForm()
+    signup_form = SignupForm(form)
     signup_form.update(
         first_name="Ken",
         last_name="Struys"...
