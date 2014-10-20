@@ -4,7 +4,7 @@ test_venv
 *.pyc
 *.egg-info
 *.DS_Store
-bower_components
+#bower_components
 node_env
 node_modules
-assets/*.css
+#assets/*.css
