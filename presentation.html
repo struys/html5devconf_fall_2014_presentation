@@ -17,24 +17,25 @@
         <div class="reveal">
             <div class="slides">
                 <section>
-                    <h1>Scaling Selenium Testing at Yelp</h1>
+                    <img src="assets/yelp_transparent.png">
+                    <h2>Scaling Selenium Testing at Yelp</h2>
                 </section>
                 <section>
                     <h2>Ken Struys</h2>
                     <ul>
                         <li>4 years at Yelp</li>
                         <li>homepage, signup, search of yelp.com</li>
-                        <li>Engineer Manager of Webcore (Infra for web devs)</li>
+                        <li>Technical Lead of Webcore (Infra for Web Devs)</li>
                     </ul>
                 </section>
                 <section class="stack">
                     <section>
                         <h2>What is Selenium?</h2>
                         <ul>
-                            <li>Automation framework for web applications</li>
-                            <li>Simulate user interactions</li>
-                            <li>Libraries for Java, Ruby, Python, JavaScript, C#, etc.</li>
-                            <li>Tests run in every browser</li>
+                            <li>Test Framework For Web Applications</li>
+                            <li>Simulate User interactions</li>
+                            <li>Code in any language</li>
+                            <li>Test every browser</li>
                         </ul>
                     </section>
                     <section>
@@ -64,7 +65,7 @@
                         </ul>
                     </section>
                     <section>
-                        <h2>Disambiguate Terms</h2>
+                        <h2>A Few Terms</h2>
                         <ul>
                             <li>Selenium RC (2004)</li>
                             <li>Selenium IDE</li>
@@ -80,6 +81,14 @@
                         </ul>
                     </section>
                     <section>
+                        <h2>Selenium IDE</h2>
+                        <ul>
+                            <li>Test Generation</li>
+                            <li>Flow Recording</li>
+                            <li>Feels really fragile</li>
+                        </ul>
+                    </section>
+                    <section>
                         <h2>Selenium Webdriver</h2>
                         <ul>
                             <li>Replaced Selenium RC in 2009</li>
@@ -92,7 +101,7 @@
 
                 <section class="stack">
                 <section>
-                    <h2>Code Examples</h2>
+                    <h2>Webdriver Examples</h2>
                     <p>Using the Python Library</p>
                 </section>
                 <section>
@@ -153,7 +162,9 @@
                     </ul>
                 </section>
                 </section>
-
+                <section>
+                    <h2>DEMO!</h2>
+                </section>
                 <section class="stack">
                 <section>
                     <h2>How we write Selenium Tests at Yelp</h2>
@@ -191,7 +202,7 @@
                     </code></pre>
                 </section>
                 <section>
-                    <h2>Execute Flows</h2>
+                    <h2>Create Flows</h2>
                     <pre><code><span class="fragment">
     def perform_login(driver, user):
         driver.get('http://dev.yelp.com/login')
@@ -211,7 +222,7 @@
                     </code></pre>
                 </section>
                 <section>
-                    <h2>Confirm Side Effects</h2>
+                    <h2>Create Assertions</h2>
 
                     <pre><code>
     def assert_user_wrote_review(user, business, review_text, rating):
@@ -238,6 +249,41 @@
         <span class="fragment">assert 'Your Review has been posted' in
             driver.find_element_by_id('alert-message')</span>
         <span class="fragment">assert_user_wrote_review(user, business, review_text, rating)</span>
+                    </code></pre>
+                </section>
+                <section>
+                    <h2>Selenium Components</h2>
+                        <p>API To Widgets</p>
+                        <pre><code>
+    form = driver.find_element_by_css_selector('.signup-form')
+
+    signup_form = SignupForm()
+    signup_form.update(
+        first_name="Ken",
+        last_name="Struys"...
+    )
+    signup_form.submit()
+                        </code></pre>
+                </section>
+                <section>
+                    <h2>Page Objects</h2>
+                    <p>API To Pages</p>
+                    <pre><code>
+    class LoginPage {
+        public LoginPage(WebDriver driver) {
+            this.driver = driver;
+
+            if (!"Login".equals(driver.getTitle())) {
+                throw new IllegalStateException("Not the login page");
+            }
+        }
+
+        public login(username, password) {
+            this.fill_form(username, password);
+            this.submit();
+            return new Homepage(this.driver);
+        }
+    }
                     </code></pre>
                 </section>
                 </section>
@@ -280,6 +326,27 @@
                         <li class="fragment">&#8594;<span>Prod</span></li>
                     </ul>
                     <p class="fragment">Stage Testing is Tedious, Boring and Error Prone</p>
+                </section>
+                </section>
+                <section class="stack">
+                <section>
+                    <h2>Common Complaints</h2>
+                </section>
+                <section>
+                    <h2>Selenium is inherently flaky</h2>
+                    <ul>
+                        <li class="fragment">Selenium RC was really flaky</li>
+                        <li class="fragment">Requires education - Dos and Don't</li>
+                        <li class="fragment">Requires Practice!</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Ain't nobody got time for that!</h2>
+                    <ul>
+                        <li class="fragment">You're manually testing anyways</li>
+                        <li class="fragment">Integration tests take less time to write</li>
+                        <li class="fragment">It's really not that complicated</li>
+                    </ul>
                 </section>
                 </section>
                 <section class="stack">
@@ -353,6 +420,14 @@
                         <li><a href="https://saucelabs.com/">saucelabs.com</a></li>
                     </ul>
                 </section>
+                <section>
+                    <h2>The Future</h2>
+                    <ul>
+                        <li class="fragment">Appium at Yelp</li>
+                        <li class="fragment">Opensource Python Libraries</li>
+                        <li class="fragment">Continuous Testing/Alerting</li>
+                    </ul>
+                </section>
                 </section>
                 <section>
                     <h2>Selenium Resources</h2>
@@ -361,6 +436,11 @@
                         <li>Presentation: <a href="http://github.com/struys/html5devconf_presentation">github.com/struys/html5devconf_presentation</a></li>
                         <li>I'm always happy to help - <a href="http://twitter.com/kenstruys">@kenstruys</a></li>
                     </ul>
+                </section>
+                <section>
+                    <h2>I want to work with passionate people</h2>
+                    <p>We're hiring</p>
+                    <a href="http://yelp.com/careers">yelp.com/careers</a>
                 </section>
                 <section>
                     <h2>Questions?</h2>
@@ -372,6 +452,9 @@
         <script src="bower_components/reveal.js/js/reveal.min.js"></script>
         <script src="bower_components/highlightjs/highlight.pack.js"></script>
         <script type="text/javascript">
+            $('section')
+                .attr('data-background', "assets/viewpage.png");
+
             Reveal.initialize({
                 history: true,
                 transition: 'linear',
@@ -381,6 +464,8 @@
                 }
             });
             hljs.initHighlightingOnLoad();
+
+            $('.slide-background').css('background-position', '50% 100%');
         </script>
     </body>
 

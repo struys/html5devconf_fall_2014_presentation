@@ -19,7 +19,7 @@ presentation: scss
 	(which google-chrome && google-chrome presentation.html) || \
 	(which firefox && firefox presentation.html) &
 
-clean: delete_fixtures
+clean:
 	rm -rf test_venv
 	rm -rf node_env
 	find . -iname '*.pyc' -delete
