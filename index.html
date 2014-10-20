@@ -278,7 +278,7 @@
             }
         }
 
-        public login(username, password) {
+        public Homepage login(String username, String password) {
             this.fill_form(username, password);
             this.submit();
             return new Homepage(this.driver);
